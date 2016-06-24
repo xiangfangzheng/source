@@ -14,20 +14,19 @@ use Think\Controller;
 class SupplierController extends Controller
 {
     public function index(){
-        $name=i('get.name');
+        $name=I('get.name');
 //        var_dump($name);
 //        exit;
+        $res['status'] = ['egt',0];
         $Supplier_model=D('Supplier');
-        if(!$name)
+        if($name)
         {
+            $res['name'] = ['like','%'.$name.'%'];
 
-            $rows= $Supplier_model->where('status>0')->select();
 
-        }else{
-            $cond=['like','%'.$name.'%'];
-            $rows= $Supplier_model->where('status>0',"status='{$cond}'")->select();
         }
-        $this->assign('rows',$rows);
+        $data = $Supplier_model->getPage($res);
+        $this->assign($data);
         $this->display();
 
 
@@ -73,14 +72,28 @@ class SupplierController extends Controller
     }
     public function remove(){
             $id=I('get.id');
-            $Supplier_model=D('Supplier');
-            if($Supplier_model->delete($id)===false){
-                $this->error(get_error($Supplier_model));
-            }else{
-                $this->success('删除成功',U('index'));
-            }
+//        物理删除
+//              $id=I('get.id');
+//            $Supplier_model=D('Supplier');
+//            if($Supplier_model->delete($id)===false){
+//                $this->error(get_error($Supplier_model));
+//            }else{
+//                $this->success('删除成功',U('index'));
+//            }
+        $id=I('get.id');
+        $data = [
+            'id'=>$id,
+            'status'=>-1,
+            'name'=>['exp','concat(name,"_del")'],
+        ];
+        if($this->_model->setField($data) === false){
+            $this->error(get_error($this->_model));
+        }else{
+            $this->success('删除成功',U('index'));
+        }
+    }
 
-     }
+
 
 
 
